@@ -34,3 +34,5 @@ Prior to graduate school, I was a software engineer at Google, where I contribut
 Earlier, I completed my undergraduate studies at the <a href="https://www.bitmesra.ac.in/">Birla Institute of Technology, Mesra</a>.
 
 I am deeply interested in applying my experience to improve software development through principled and practical techniques.
+
+Email: siddharth 'dot' priya 'at' uwaterloo.ca
