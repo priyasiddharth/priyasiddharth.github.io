@@ -1,97 +1,205 @@
+# - title: General Information
+#   type: map
+#   contents:
+#     - name: Full Name
+#       value: Albert Einstein
+#     - name: Date of Birth
+#       value: 14th March 1879
+#     - name: Languages
+#       value: English, German
+
+# - title: Education
+#   type: time_table
+#   contents:
+#     - title: PhD
+#       institution: University of Zurich, Zurich, Switzerland
+#       year: 1905
+#       description:
+#         - Description 1.
+#         - Description 2.
+#         - title: Description 3.
+#           contents:
+#             - Sub-description 1.
+#             - Sub-description 2.
+#     - title: Federal teaching diploma
+#       institution: Eidgenössische Technische Hochschule, Zurich, Switzerland
+#       year: 1900
+#       description:
+#         - Description 1.
+#         - Description 2.
+
+# - title: Experience
+#   type: time_table
+#   contents:
+#     - title: Professor of Theoretical Physics
+#       institution: Institute for Advanced Study, Princeton University
+#       year: 1933 - 1955
+#       description:
+#         - Description 1.
+#         - Description 2.
+#         - title: Description 3.
+#           contents:
+#             - Sub-description 1.
+#             - Sub-description 2.
+#     - title: Visiting Professor
+#       institution: California Institute of Technology, Pasadena, California, US
+#       year: 1933
+#       description:
+#         - Description 1.
+#         - Description 2.
+
+#     - title: Director
+#       institution: Kaiser Wilhelm Institute for Physics, Berlin, Germany.
+#       year: 1917-1933
+
+#     - title: Professor of Theoretical Physics
+#       institution: Karl-Ferdinand University, Prague, Czechoslovakia
+#       year: 1911 - 1917
+#       description:
+
+#     - title: Associate Professor of Theoretical Physics
+#       institution: University of Zurich, Zurich, Switzerland
+#       year: 1909 - 1911
+
+# - title: Open Source Projects
+#   type: time_table
+#   contents:
+#     - title: <a href="https://github.com/alshedivat/al-folio">al-folio</a>
+#       year: 2015-now
+#       description: A beautiful, simple, clean, and responsive Jekyll theme for academics.
+
+# - title: Honors and Awards
+#   type: time_table
+#   contents:
+#     - year: 1921
+#       items:
+#         - Nobel Prize in Physics
+#         - Matteucci Medal
+#     - year: 2029
+#       items:
+#         - Max Planck Medal
+
+# - title: Academic Interests
+#   type: nested_list
+#   contents:
+#     - title: Topic 1.
+#       items:
+#         - Description 1.
+#         - Description 2.
+#     - title: Topic 2.
+#       items:
+#         - Description 1.
+#         - Description 2.
+
+# - title: Other Interests
+#   type: list
+#   contents:
+#     - <u>Hobbies:</u> Hobby 1, Hobby 2, etc.
+
 - title: General Information
   type: map
   contents:
     - name: Full Name
-      value: Albert Einstein
-    - name: Date of Birth
-      value: 14th March 1879
-    - name: Languages
-      value: English, German
+      value: Siddharth Priya
+    # - name: Email
+    #   value: your.email@example.com
+    # - name: Phone
+    #   value: +1 (555) 019-9000
+    # - name: Address
+    #   value: 123 Main St, Anytown, USA
 
 - title: Education
   type: time_table
   contents:
-    - title: PhD
-      institution: University of Zurich, Zurich, Switzerland
-      year: 1905
+    - title: PhD in Electrical and Computer Engineering
+      institution: University of Waterloo, Waterloo, Canada
+      year: 2021–present
+    - title: MASc in Electrical and Computer Engineering
+      institution: University of Waterloo, Waterloo, Canada
+      year: 2020–2021
       description:
-        - Description 1.
-        - Description 2.
-        - title: Description 3.
-          contents:
-            - Sub-description 1.
-            - Sub-description 2.
-    - title: Federal teaching diploma
-      institution: Eidgenössische Technische Hochschule, Zurich, Switzerland
-      year: 1900
-      description:
-        - Description 1.
-        - Description 2.
+        - Thesis: Bounded Model Checking of Industrial Code
+    - title: BE in Computer Science and Engineering
+      institution: Birla Institute of Technology, Mesra, Ranchi, India
+      year: 2002–2006
 
-- title: Experience
+- title: Teaching Experience
   type: time_table
   contents:
-    - title: Professor of Theoretical Physics
-      institution: Institute for Advanced Study, Princeton University
-      year: 1933 - 1955
-      description:
-        - Description 1.
-        - Description 2.
-        - title: Description 3.
-          contents:
-            - Sub-description 1.
-            - Sub-description 2.
-    - title: Visiting Professor
-      institution: California Institute of Technology, Pasadena, California, US
-      year: 1933
-      description:
-        - Description 1.
-        - Description 2.
+    - title: TA for ECE 653, Software Testing Quality Assurance and Maintenance
+      institution: University of Waterloo
+      year: Fall 2023
+    - title: TA for ECE 351, Compilers
+      institution: University of Waterloo
+      year: Fall 2021
+    - title: TA for ECE 406, Algorithm Design and Analysis
+      institution: University of Waterloo
+      year: Winter 2021
 
-    - title: Director
-      institution: Kaiser Wilhelm Institute for Physics, Berlin, Germany.
-      year: 1917-1933
-
-    - title: Professor of Theoretical Physics
-      institution: Karl-Ferdinand University, Prague, Czechoslovakia
-      year: 1911 - 1917
-      description:
-
-    - title: Associate Professor of Theoretical Physics
-      institution: University of Zurich, Zurich, Switzerland
-      year: 1909 - 1911
-
-- title: Open Source Projects
+- title: Work Experience
   type: time_table
   contents:
-    - title: <a href="https://github.com/alshedivat/al-folio">al-folio</a>
-      year: 2015-now
-      description: A beautiful, simple, clean, and responsive Jekyll theme for academics.
+    - title: Senior Software Engineer, System Software, Platforms
+      institution: Google LLC, Sunnyvale, CA, USA
+      year: 2014–2019
+      description:
+        - Led system software development for data center compute products
+        - Firmware development and maintenance of server systems
+        - Improved build-system for error reporting and dev speed
+        - Mentored and onboarded engineers
+    - title: Software Engineer, Google Apps
+      institution: Google India Pvt. Ltd., Hyderabad, India
+      year: 2012–2014
+      description:
+        - Front-end developer for Data Migration Service (DMS)
+        - Designed testing framework for DMS
+        - Maintainer for Google Apps Migration for Microsoft Exchange
+    - title: Technical Lead - Integrated Development Environment (IDE) 
+      institution: Google India Pvt. Ltd., Hyderabad, India
+      year: 2008–2010
+      description:
+        - Led implementation of testing and code coverage tools for IntelliJ and Eclipse IDEs
+        - Designed solutions to scale for large Google monorepo software projects 
+    - title: Software Engineer, Google Checkout
+      institution: Google India Pvt. Ltd., Hyderabad, India
+      year: 2006–2008
+      description:
+        - Developed front-end test tools and supported testers
 
 - title: Honors and Awards
   type: time_table
   contents:
-    - year: 1921
+    - year: 2023
       items:
-        - Nobel Prize in Physics
-        - Matteucci Medal
-    - year: 2029
+        - Ripple Graduate Fellowship
+    - year: 2021
       items:
-        - Max Planck Medal
+        - Waterloo Cybersecurity and Privacy Institute (CPI) Excellence Scholarship
 
-- title: Academic Interests
+- title: Publications
   type: nested_list
   contents:
-    - title: Topic 1.
+    - title: Conference Papers
       items:
-        - Description 1.
-        - Description 2.
-    - title: Topic 2.
-      items:
-        - Description 1.
-        - Description 2.
+        - FMCAD 2025: "A Tale of Two Case Studies: A Unified Exploration of Rust Verification with SeaBMC"
+        - SEFM 2024: "Unlocking the Power of Environment Assumptions for Unit Proofs"
+        - FMCAD 2024: "Ownership in low-level intermediate representation"
+        - FMCAD 2022: "Bounded Model Checking for LLVM"
+        - Innovations in Systems and Software Engineering 2022: "Verifying Verified Code"
+        - ATVA 2021: "Verifying Verified Code"
+        - ALIFE 2020: "Life-Span Expectancy and Cycle Size in the Original Autopoiesis Algorithm"
+        - SCAM 2012: "Building Useful Program Analysis Tools Using an Extensible Java Compiler"
 
-- title: Other Interests
+- title: Workshops
+  type: time_table
+  contents:
+    - title: Rust Verification Workshop, ETAPS 2025
+      institution: Hamilton, Canada
+      year: 2025
+      description:
+        - Presented: "Bounded Model Checking for Rust"
+
+- title: Community Service
   type: list
   contents:
-    - <u>Hobbies:</u> Hobby 1, Hobby 2, etc.
+    - Sub-reviewer and artifact evaluator for FMCAD, TACAS, CAV (2021, 2022, 2024, 2025)
