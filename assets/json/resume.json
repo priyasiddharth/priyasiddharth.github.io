@@ -100,7 +100,7 @@
       "position": "Sub-reviewer and Artifact Evaluator",
       "url": "",
       "startDate": "2021-01-01",
-      "endDate": "2025-01-01",
+      "endDate": "2025-09-01",
       "summary": "Reviewed and evaluated artifacts for FMCAD, TACAS, CAV",
       "highlights": []
     }
@@ -111,14 +111,28 @@
       "date": "2023-04-01",
       "awarder": "University of Waterloo",
       "url": "",
-      "summary": ""
+      "summary": "Awarded for conducting research in security of Blockchain systems."
     },
     {
       "title": "Cybersecurity and Privacy Institute Excellence Scholarship",
       "date": "2021-08-01",
       "awarder": "University of Waterloo",
       "url": "",
-      "summary": ""
+      "summary": "Awarded for academic performance and research in cybersecurity."
+    },
+    {
+      "title": "Faculty of Engineering term award",
+      "date": "2021-11-01",
+      "awarder": "University of Waterloo",
+      "url": "",
+      "summary": "Awarded for exceptional academic, research, and, outreach performance in the term."
+    },
+    {
+      "title": "Faculty of Engineering term award",
+      "date": "2022-06-01",
+      "awarder": "University of Waterloo",
+      "url": "",
+      "summary": "Awarded for exceptional academic, research, and, outreach performance in the term."
     }
   ],
   "certificates": [],
