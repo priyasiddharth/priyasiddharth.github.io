@@ -5,7 +5,7 @@ date: 2025-11-29 21:01:00
 description: Stable denotations implementation in Rust
 tags: Rust, Monads, Effects
 categories: PL
-thumbnail: assets/img/9.jpg
+thumbnail: assets/img/stable-denotations-icon.svg
 toc:
   sidebar: left
 ---
