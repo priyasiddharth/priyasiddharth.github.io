@@ -1,19 +1,16 @@
 ---
 layout: post
-title: Stable Denotations
-date: 2025-12-04 21:01:00
+title: Stable Denotations - Effects as Interactions
+date: 2025-11-29 21:01:00
 description: Stable denotations implementation in Rust
 tags: Rust, Monads, Effects
 categories: PL
 thumbnail: assets/img/9.jpg
+toc:
+  sidebar: left
 ---
 
-# Stable Denotations: Effects as Interactions
-
 An executable version can be found [here](https://github.com/priyasiddharth/stable-denotations).
-
-* Table of contents
-{:toc}
 
 ## Introduction
 
