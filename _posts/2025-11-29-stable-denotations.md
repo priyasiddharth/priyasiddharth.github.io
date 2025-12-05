@@ -22,16 +22,16 @@ After this tutorial, we recommend reading the original to reinforce the concepts
 Our journey will cover
 the following:
 
-| Interpreter | Description |
-|-------------|-------------|
-| I-0         | Traditional definitional interpreter for integers and increment (`Expr`, `Dom`, `eval`). |
-| I-1         | Extended interpreter adding booleans, equality, and conditionals by redefining syntax and eval. |
+| Interpreter | Description                                                                                        |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| I-0         | Traditional definitional interpreter for integers and increment (`Expr`, `Dom`, `eval`).           |
+| I-1         | Extended interpreter adding booleans, equality, and conditionals by redefining syntax and eval.    |
 | I-2         | Tagless-final style core language (`EBasic`) with abstract domain and reusable terms like `ttinc`. |
-| I-2+        | Compositional extension adding conditionals (`ECond`) without changing existing definitions. |
-| I-3         | State-threading interpretation using explicit state transformers (`DomIntState`). |
-| I-4         | Effects-as-interactions with request/handler model over computations `Comp<ReqT>`. |
-| I-4s        | I-4 extended with a sequencing operator (`seq`) built from `bind` for effectful composition. |
-| I-4s+       | I-4s with conditionals reintroduced over the computation monad. |
+| I-2+        | Compositional extension adding conditionals (`ECond`) without changing existing definitions.       |
+| I-3         | State-threading interpretation using explicit state transformers (`DomIntState`).                  |
+| I-4         | Effects-as-interactions with request/handler model over computations `Comp<ReqT>`.                 |
+| I-4s        | I-4 extended with a sequencing operator (`seq`) built from `bind` for effectful composition.       |
+| I-4s+       | I-4s with conditionals reintroduced over the computation monad.                                    |
 
 Let's begin.
 
@@ -47,7 +47,6 @@ We start with the simplest language: integer literals, increment, and applicatio
 We refer to an interpreter for this language as I-0.
 
 In Rust, we define the language as an enum `Expr`:
-
 
 ```rust
 // Traditional definitional interpreter approach
@@ -114,7 +113,6 @@ println!("Traditional interpreter: inc (inc 2) ->* {:?}", result);
 
     Traditional interpreter: inc (inc 2) ->* DInt(4)
 
-
 ### Step 2: Extending the Language (I-1)
 
 Now we want to add booleans, equality, and conditionals.
@@ -122,7 +120,6 @@ This interpreter is called I-1.
 
 In Rust, `enum` and `functions` are not extensible.
 Thus, we copy and redefine `Expr` to `ExprExtended` and `eval` to `eval_extended`.
-
 
 ```rust
 // Language 2: Extended with conditionals and equality
@@ -214,23 +211,22 @@ println!("Extended interpreter: if 3 == 4 then 10 else 5 ->* {:?}", result);
 
     Extended interpreter: if 3 == 4 then 10 else 5 ->* DInt(5)
 
-
 Our first extension exposes a problem.
 This approach does not allow us to compose existing definitions with new features.
-The semantics are **unstable**. 
+The semantics are **unstable**.
 
 ## Part 1: A Different Approach (I-2)
+
 From okmij:
-_Let us go back to the simplest language of integers and increments, and define it differently. Instead of a data type, which then has to be interpreted as `Dom`, let us define a language by directly telling the meaning of each language phrase, and how to make sense of a compound phrase from the meaning of its components_. 
+_Let us go back to the simplest language of integers and increments, and define it differently. Instead of a data type, which then has to be interpreted as `Dom`, let us define a language by directly telling the meaning of each language phrase, and how to make sense of a compound phrase from the meaning of its components_.
 
 Here we do not delegate evaluation to an `eval` function. Rather each expression definition carries its evaluation semantics.
 This interpreter is called I-2.
 
 From okmij:
-_For generality, which will come handy later on, we do not fix the domain of denotations to be `Dom`. Rather, we make it variable `d`. All in all, we define a language by a set of definitions, one per syntactic form, each defining the domain mapping for that form. The domain is kept abstract._ 
+_For generality, which will come handy later on, we do not fix the domain of denotations to be `Dom`. Rather, we make it variable `d`. All in all, we define a language by a set of definitions, one per syntactic form, each defining the domain mapping for that form. The domain is kept abstract._
 
 Thus we define a language as a **trait** in Rust (type class in Haskell):
-
 
 ```rust
 // Define the language as a trait - domain is kept abstract
@@ -244,18 +240,15 @@ trait EBasic {
 The type is: fn ttinc<D: EBasic>() -> D
 Meaning: given an appropriate domain D, ttinc gives the meaning of inc (inc 2) in that domain
 
-
 ```rust
 fn ttinc<D: EBasic>() -> D {
     D::app(D::inc(), D::app(D::inc(), D::int(2)))
 }
 ```
 
-
 Use Dom as defined earlier.
 Now we must tell that Dom is 'appropriate' to give meaning to the basic language
 Helper for increment lifted to Dom
-
 
 ```rust
 fn inc_helper(x: Dom) -> Dom {
@@ -268,17 +261,16 @@ fn inc_helper(x: Dom) -> Dom {
 
 Now define an instance of EBasicSimple trait for domain `Dom`.
 
-
 ```rust
 impl EBasic for Dom {
     fn int(n: i64) -> Self {
         Dom::DInt(n)  // int = DInt
     }
-    
+
     fn inc() -> Self {
         Dom::DFun(Box::new(inc_helper))  // inc = injI succ (lifted successor)
     }
-    
+
     fn app(e1: Self, e2: Self) -> Self {
         match e1 {
             Dom::DFun(f) => f(e2),  // app (DFun f) e2 = f e2
@@ -294,12 +286,10 @@ println!("Result: inc (inc 2) ->* {:?}", result);
 
     Result: inc (inc 2) ->* DInt(4)
 
-
 ### Adding conditionals compositionally (I-2+)
 
 Now we can add conditionals compositionally without rewriting affecting existing semantics.
 Thus, I-2+ is an incremental addition to I-2.
-
 
 ```rust
 // Conditionals as a separate trait (domain kept abstract).
@@ -345,13 +335,11 @@ println!("Demo ttif (specialized to Dom) ->* {:?}", result_if);
 
     Demo ttif (specialized to Dom) ->* DInt(5)
 
-
 ### Adding State (I-3)
 
 Now let's try adding a simple effect to our language: a global mutable memory cell.
 This interpreter is I-3.
 We define the primitives to access the current state and to change it, returning the new value:
-
 
 ```rust
 trait GlobalIntState {
@@ -363,7 +351,6 @@ trait GlobalIntState {
 Now we realize that `get` and `put` need to act on a state. Where will that state be carried?
 The solution is to redefine the abstract domain to carry state and define `get` and `put` operations on this domain.
 
-
 ```rust
 // Type DomIntState = Int -> (Dom, Int)
 // A state transformer: takes current state, returns (value, new_state)
@@ -374,7 +361,7 @@ impl GlobalIntState for DomIntState {
     fn get() -> Self {
         Box::new(|s| (Dom::DInt(s), s))
     }
-    
+
     // put e = \s -> case e s of
     //   (DInt s', _) -> (DInt s', s')
     //   (_, s)       -> (DError, s)
@@ -392,19 +379,18 @@ impl GlobalIntState for DomIntState {
 Now we must create an instance of `EBasic` for the domain `DomIntState`.
 Note that even though int(n) has nothing to do with state, it must thread state through itself.
 
-
 ```rust
 impl EBasic for DomIntState {
     // int x = \s -> (DInt x, s)
     fn int(n: i64) -> Self {
         Box::new(move |s| (Dom::DInt(n), s))  // Thread state even though unused!
     }
-    
+
     // inc = \s -> (DFun(inc_helper), s)
     fn inc() -> Self {
         Box::new(|s| (Dom::DFun(Box::new(inc_helper)), s))  // Thread state!
     }
-    
+
     // app e1 e2 = \s0 -> let (f, s1) = e1 s0
     //                        (x, s2) = e2 s1
     //                    in (app f x, s2)
@@ -428,14 +414,13 @@ println!("With state threading: ttinc(100) ->* {:?}, final_state={}", final_valu
 
     With state threading: ttinc(100) ->* DInt(4), final_state=100
 
-
 ## Part 2: The Key Insight: Effects as Interactions
 
 What have we seen so far?
 
 We started with a simple interpreter **I-0** that we extended with conditionals **I-1**.
 However, we had to redefine both the domain and the eval function (unstable denotations).
-We then tried a different approach where each expression carried its own meaning in **I-2**. 
+We then tried a different approach where each expression carried its own meaning in **I-2**.
 This was very useful in incrementally adding conditionals, resulting in **I-2+**, i.e., we got denotional stability on the axis of adding _pure_ features.
 
 Interestingly, when we added a global mutable memory cell, we need to implement `EBasic` again.
@@ -445,6 +430,7 @@ We will now extend stability to effects.
 The solution is to treat effects not as transformations of a semantic domain, but as **interactions** between an expression and its context:
 
 1. **Expressions produce values or make requests**
+
    - `Done(value)`: A completed computation
    - `Req(request, continuation)`: Ask the context for help, continue when answered
 
@@ -455,7 +441,6 @@ The solution is to treat effects not as transformations of a semantic domain, bu
 4. **Only handlers change** -- they interpret requests in different ways
 
 This is what we'll build next! The denotations become **stable**: adding new effects doesn't change existing meanings.
-
 
 ```rust
 // Request types
@@ -491,13 +476,13 @@ It is our **syntax tree for denotations**.
 We can print the computation at any stage and inspect the tree.
 
 ### Key components:
+
 - **Primitives**: `Int`, `Bool`, `Var` (variables)
 - **Lambda abstractions**: `Lam(var, body)`
 - **Operations**: `Inc`, `Eq`, `EqArg2` (partially applied equality)
 - **Control flow**: `App` (application), `If`
 - **State operations**: `Get`, `Put`, `Req`
 - **Composition**: `Bind` (monadic bind), `HandleState`
-
 
 ```rust
 // Simple global counter for single-threaded Jupyter environment
@@ -543,11 +528,11 @@ impl DescriptionTree {
     fn identity() -> Self {
         DescriptionTree::Lam("x".to_string(), Box::new(DescriptionTree::Var("x".to_string())))
     }
-    
+
     // Helper to check if this is identity
     fn is_identity(&self) -> bool {
-        matches!(self, 
-            DescriptionTree::Lam(v, body) 
+        matches!(self,
+            DescriptionTree::Lam(v, body)
             if v == "x" && matches!(body.as_ref(), DescriptionTree::Var(bv) if bv == "x")
         )
     }
@@ -584,8 +569,9 @@ impl fmt::Debug for DescriptionTree {
 ### DomC - The Domain of Computation Values
 
 Values in our language can be:
+
 - **Integers** (`DCInt`): the numbers themselves
-- **Booleans** (`DCBool`): true/false values  
+- **Booleans** (`DCBool`): true/false values
 - **Functions** (`DCFun`): wrapped as `Abstraction` with ID and description
 
 We define the core types together since they're mutually recursive: `Abstraction` contains functions from `DomC` to `Comp`, `DomC` contains `Abstraction`, and `Comp` contains both.
@@ -593,24 +579,27 @@ We define the core types together since they're mutually recursive: `Abstraction
 #### Key Design Choices:
 
 **Abstraction wrapper:** Each function is wrapped in an `Abstraction` struct that tracks:
+
 - A unique `id` for debugging and display
 - A `kind` (`DescriptionTree`) describing the function body
 - The actual Rust closure `f` that implements the function
 
 Note that the following types are mutually recursive:
+
 - Functions (`DCFun`) need to return computations (`Comp`)
 - Computations (`Comp`) need to contain values (`DomC`) and continuations (`Abstraction`)
 - Abstractions transform values to computations (`DomC -> Comp`)
 
 **Comp structure:** A computation (`Comp`) pairs a `DescriptionTree` (for inspection/debugging) with a `CompInner`:
+
 - `Done(value)`: A completed computation with its final value
 - `Req(request, continuation)`: An effect request with a continuation function
 
 This design allows us to:
+
 1. Track and print the structure of computations before running them
 2. Separate pure values (`DomC`) from effectful computations (`Comp`)
 3. Handle effects uniformly through the request/continuation pattern
-
 
 ```rust
 // DomC - domain of computation
@@ -688,7 +677,7 @@ impl<ReqT> Comp<ReqT> {
     fn done(d: DomC<ReqT>, desc: DescriptionTree) -> Self {
         Comp { desc, inner: CompInner::Done(d) }
     }
-    
+
     fn req(r: ReqT, k: Abstraction<ReqT>, desc: DescriptionTree) -> Self {
         Comp { desc, inner: CompInner::Req(r, k) }
     }
@@ -702,6 +691,7 @@ Let's understand what happens when we evaluate `app inc get`.
 #### The Challenge
 
 Consider the expression `app inc get`:
+
 - `get` is an **effectful computation** that retrieves the current state
 - `inc` is a **function** that increments its argument
 - `app` must apply `inc` to the **result** of `get`
@@ -711,6 +701,7 @@ But here's the problem: `get` doesn't immediately produce a value! Instead, it p
 #### What We Need
 
 When evaluating `app inc get`, we need to:
+
 1. **First** evaluate `get` to get the current state value
 2. **Then** apply `inc` to that value
 3. **Preserve** any effects that `get` might have triggered
@@ -720,24 +711,28 @@ This is **sequencing** - we must wait for one computation to complete before con
 #### A More Complex Example
 
 Consider: `app inc (app inc get)`
+
 - Evaluate the inner `app inc get`:
-    - Get the state (say it's 5)
-    - Apply `inc` to get 6
+  - Get the state (say it's 5)
+  - Apply `inc` to get 6
 - Apply the outer `inc` to get 7
 
 At each `app`, we must:
+
 - Wait for the left side to produce a function
-- Wait for the right side to produce a value  
+- Wait for the right side to produce a value
 - Apply the function to the value
 
 #### The Pattern
 
 Every time we have an effectful computation that produces a value we want to use, we need to:
+
 1. **Execute** the computation to get its value
 2. **Continue** with the rest of the program using that value
 3. **Thread through** any effects the computation generated
 
 This "execute then continue" pattern appears everywhere:
+
 - In `app e1 e2`: execute `e1` to get a function, execute `e2` to get an argument, then apply
 - In `if_ cond et ef`: execute `cond` to get a boolean, then execute the appropriate branch
 - In `put e`: execute `e` to get a value, then update the state with it
@@ -752,19 +747,20 @@ enum CompInner<ReqT> {
     Req(ReqT, Abstraction<ReqT>),
 }
 ```
+
 So every computation is either:
 
-* Done(value) – a finished computation that has already produced a value, or,
-* Req(request, continuation) – an interaction with the context:
-“please handle this request, then resume by calling continuation with the answer”.
-bind is the general sequencing operation. 
+- Done(value) – a finished computation that has already produced a value, or,
+- Req(request, continuation) – an interaction with the context:
+  “please handle this request, then resume by calling continuation with the answer”.
+  bind is the general sequencing operation.
 
 In math-like notation:
+
 ```
 bind (Done x) k    = k x
 bind (Req r k1) k2 = Req r (\x -> bind (k1 x) k2)
 ```
-
 
 ```rust
 impl<ReqT: 'static + fmt::Display> Comp<ReqT> {
@@ -821,7 +817,6 @@ We define language features as traits with static methods implemented directly o
 **EBasic:** Core primitives (`int`, `inc`, `app`)  
 `app` uses `bind` internally.
 In general, semantics of `EBasic` is oblivious to our effect language (i.e., `get`, `put`).
-
 
 ```rust
 impl EBasic for Comp<ReqT> {
@@ -910,22 +905,23 @@ impl EBasic for Comp<ReqT> {
 
 ### Adding State
 
-At this point we keep the core language (`EBasic`) completely unchanged and add state *orthogonally* via a separate trait:
+At this point we keep the core language (`EBasic`) completely unchanged and add state _orthogonally_ via a separate trait:
 
 - `EBasic` still only knows about:
-    - `int` (integer literals),
-    - `inc` (functions over integers),
-    - `app` (application using `bind` for sequencing).
+
+  - `int` (integer literals),
+  - `inc` (functions over integers),
+  - `app` (application using `bind` for sequencing).
 
 - State is introduced by an existing trait:
-    - `GlobalIntState` with operations `get` and `put`.
+  - `GlobalIntState` with operations `get` and `put`.
 
 The semantics of `get`/`put` are given **directly on the computation domain** (`Comp<ReqT>`) and expressed in terms of requests:
+
 - `get` issues a `ReqState(Get)` request and continues with the identity continuation.
 - `put e` first evaluates `e` using `bind`, then issues a `ReqState(Put n)` request when `e` produces `DCInt(n)`.
 
 This keeps the basic language definitions stable: we don’t touch `EBasic` when adding state, we just enrich the effect language (`ReqT`) and provide an implementation of `GlobalIntState` for `Comp<ReqT>`.
-
 
 ```rust
 impl GlobalIntState for Comp<ReqT> {
@@ -978,10 +974,10 @@ Handlers give meaning to requests by pattern‑matching on them and providing re
 `handle_state` is a handler for `Comp<ReqT>` that interprets `ReqState` requests under an integer state:
 
 - Input:
-    - initial state `s: i64`
-    - computation `comp: Comp<ReqT>`
+  - initial state `s: i64`
+  - computation `comp: Comp<ReqT>`
 - Output:
-    - a new computation where all `ReqState` requests are handled.
+  - a new computation where all `ReqState` requests are handled.
 
 A computation is either:
 
@@ -990,18 +986,16 @@ A computation is either:
 
 `handle_state` processes these cases as:
 
-1. **Done**  requires no special handling.
+1. **Done** requires no special handling.
 2. **State requests**
-     - `Get` returns the current state `s` and continues under the same `s`.
-     - `Put(new_s)` updates the state to `new_s` and continues under `new_s`.
+   - `Get` returns the current state `s` and continues under the same `s`.
+   - `Put(new_s)` updates the state to `new_s` and continues under `new_s`.
 3. **Errors** stop interpretation.
 
 4. **Other effects** - Non‑state requests are re‑emitted, but their continuation is wrapped so that when they resume, their result is passed back into `handle_state`.
-This design assumes a hierarchy of handlers.
+   This design assumes a hierarchy of handlers.
 
 This illustrates the **effects-as-interactions** view: computations issue `Req`uest values; handlers decide how to answer them, while the core language stays unchanged. This interpreter is called **I-4**.
-
-
 
 ```rust
 // Pretty print computation tree
@@ -1057,7 +1051,6 @@ fn handle_state(s: i64, comp: Comp<ReqT>) -> Comp<ReqT> {
 
 #### Test for I-4
 
-
 ```rust
 // Test get/put with inc (no conditionals)
 fn test_state_basic() -> Comp<ReqT> {
@@ -1074,7 +1067,6 @@ println!("\nAfter handling:");
 print_comp_tree(&result, 0);
 ```
 
-    
     === Test: put 5
     Before handling:
     Req(ReqState(Put(5)), λ#1[λx. x])
@@ -1082,10 +1074,9 @@ print_comp_tree(&result, 0);
       Req(ReqState(Put(5)), λ#1[λx. x])
     Handling state 5 for:
       Done(DCInt(5))
-    
+
     After handling:
     Done(DCInt(5))
-
 
 ### Sequencing (I-4s)
 
@@ -1101,7 +1092,6 @@ In our setting, both `e1` and `e2` are `Comp<ReqT>` computations that may contai
 
 This definition reuses `bind` as the general **effect-aware sequencing primitive**: `bind` runs `e1` to completion (threading all its requests/handlers) and then invokes the continuation `\_ -> e2`, which simply ignores the first result and returns `e2`. The next code block shows this trait and its implementation for `Comp<ReqT>`, followed by a test that sequences several stateful operations.
 The I-4 machine with sequence command is called **I-4s**.
-
 
 ```rust
 // Sequencing trait - for discarding first result and continuing with second
@@ -1121,7 +1111,6 @@ impl Seq for Comp<ReqT> {
 ```
 
 #### I-4s test
-
 
 ```rust
 fn test_state_basic() -> Comp<ReqT> {
@@ -1157,7 +1146,6 @@ match &result.inner {
 }
 ```
 
-    
     === Test: put 5; get; put (inc get); get ===
     Before handling:
     Req(ReqState(Put(5)), λ#17[λx. bind(x, λ_. bind(get, λ_. bind(bind(bind(get, λa. app(λ#3[λx. x + 1], a)), λx. Req(put(x))), λ_. get)))])
@@ -1173,7 +1161,7 @@ match &result.inner {
       Req(ReqState(Get), λ#11[λx. x])
     Handling state 6 for:
       Done(DCInt(6))
-    
+
     After handling:
     Done(DCInt(6))
     ✓ Test passed: final value is 6
@@ -1184,14 +1172,12 @@ match &result.inner {
 
     ()
 
-
-
 ### Add back conditional (I-4s+)
 
 In the implementation of `if_` for `Comp<ReqT>`:
 
 - `cond` is a **computation** that will eventually yield a `DCBool` (or an error), but it may also issue requests (`ReqState`, `ReqError`, …) along the way.
-- `bind` is used to *run* this computation and then *decide* which branch to execute once the boolean is available.
+- `bind` is used to _run_ this computation and then _decide_ which branch to execute once the boolean is available.
 
 The definition:
 
@@ -1239,7 +1225,7 @@ More concretely:
    }
    ```
 
-   returning either `et` or `ef` *as computations*. Any effects in `et` or `ef` are left untouched.
+   returning either `et` or `ef` _as computations_. Any effects in `et` or `ef` are left untouched.
 
 3. If `cond` is not finished but instead produces a `Req(r, k1)`, `bind` re-emits that request and composes the existing continuation `k1` with the new “if-continuation”. Operationally, this means:
 
@@ -1251,7 +1237,6 @@ Thus, `bind` is the mechanism that:
 - **waits** for `cond` to finish producing a boolean,
 - **threads** any intermediate effects from `cond` through the same handlers,
 - and then **selects** and returns the appropriate branch computation (`et` or `ef`) without changing their definitions.
-
 
 ```rust
 
@@ -1332,7 +1317,6 @@ impl ECond for Comp<ReqT> {
 
 #### Test for I-4s+
 
-
 ```rust
 // ttinc :: EBasic d => d
 // ttinc = inc `app` (inc `app` int 2)
@@ -1348,10 +1332,10 @@ fn test_tts() -> Comp<ReqT> {
         Comp::app(Comp::eq(), Comp::int(3)),
         Comp::put(ttinc())
     );
-    
+
     let then_branch = Comp::put(Comp::int(10));
     let else_branch = Comp::put(Comp::app(Comp::inc(), Comp::get()));
-    
+
     Comp::if_(condition, then_branch, else_branch)
 }
 
@@ -1379,10 +1363,9 @@ print_comp_tree(&result, 0);
       Req(ReqState(Put(5)), λ#30[λx. x])
     Handling state 5 for:
       Done(DCInt(5))
-    
+
     After handling state:
     Done(DCInt(5))
-
 
 ## Discovering Monads
 
@@ -1406,16 +1389,16 @@ subject to three laws: **left identity**, **right identity**, and **associativit
 
 In this notebook:
 
-- The *values* live in `DomC<ReqT>`.
-- The *computations* live in `Comp<ReqT>`.
+- The _values_ live in `DomC<ReqT>`.
+- The _computations_ live in `Comp<ReqT>`.
 - `Comp::done : DomC<ReqT> -> Comp<ReqT>` is our “pure”:
-    it takes a plain value and produces a finished computation:
-    it never issues any requests, it’s just `Done(value)`.
+  it takes a plain value and produces a finished computation:
+  it never issues any requests, it’s just `Done(value)`.
 - `Comp::bind(self, k)` is our sequencing operator:
-    it runs `self` until it either:
-    - finishes with `Done(x)` and then calls `k(x)`, or
-    - issues a request `Req(r, k1)`, in which case it *re-emits* the request and composes the original continuation `k1` with `k`:
-        when the handler later supplies an answer `x`, the new continuation first resumes via `k1(x)`, then keeps binding with `k`.
+  it runs `self` until it either:
+  - finishes with `Done(x)` and then calls `k(x)`, or
+  - issues a request `Req(r, k1)`, in which case it _re-emits_ the request and composes the original continuation `k1` with `k`:
+    when the handler later supplies an answer `x`, the new continuation first resumes via `k1(x)`, then keeps binding with `k`.
 
 Conceptually:
 
@@ -1464,12 +1447,12 @@ k_id(x) = done x
 For each shape of `m`:
 
 - If `m = Done(x)`:
-    `bind(Done(x), k_id)` reduces to `k_id(x) = done x`, which is observationally the same as `m` (a completed computation with the same value and description).
+  `bind(Done(x), k_id)` reduces to `k_id(x) = done x`, which is observationally the same as `m` (a completed computation with the same value and description).
 - If `m = Req(r, k1)`:
-    `bind(Req(r, k1), k_id)` becomes `Req(r, k')` where `k'(x) = bind(k1(x), k_id)`.
-    When the handler eventually supplies a value `v` for the request:
-    - `k1(v)` is exactly the continuation that `m` would have used,
-    - `bind(k1(v), k_id)` then acts as in the `Done` case and does not change the resulting computation.
+  `bind(Req(r, k1), k_id)` becomes `Req(r, k')` where `k'(x) = bind(k1(x), k_id)`.
+  When the handler eventually supplies a value `v` for the request:
+  - `k1(v)` is exactly the continuation that `m` would have used,
+  - `bind(k1(v), k_id)` then acts as in the `Done` case and does not change the resulting computation.
     Thus, the behaviour of `Req(r, k')` is the same as that of the original `Req(r, k1)` — requests and their answers are handled identically.
 
 So `bind m done` behaves the same as `m`, satisfying right identity.
@@ -1483,82 +1466,82 @@ bind (bind m f) g  =  bind m (\x -> bind (f x) g)
 We must consider both shapes of `m`:
 
 - If `m = Done(x)`:
-    - Left-hand side: `bind (bind (Done x) f) g`
-        - `bind(Done x, f)` gives `f(x)`.
-        - Then `bind(f(x), g)` continues with `g` after `f`.
-    - Right-hand side: `bind (Done x) (\x -> bind (f x) g)`
-        - `bind(Done x, ...)` simply calls the continuation on `x`, giving `bind(f(x), g)`.
+
+  - Left-hand side: `bind (bind (Done x) f) g`
+    - `bind(Done x, f)` gives `f(x)`.
+    - Then `bind(f(x), g)` continues with `g` after `f`.
+  - Right-hand side: `bind (Done x) (\x -> bind (f x) g)` - `bind(Done x, ...)` simply calls the continuation on `x`, giving `bind(f(x), g)`.
     Both sides coincide.
 
 - If `m = Req(r, k1)`:
 
-    Let `bind` be implemented as:
+  Let `bind` be implemented as:
 
-    pure/return:
+  pure/return:
 
-    ```text
-    bind(Done x,   f) = f x
-    ```
+  ```text
+  bind(Done x,   f) = f x
+  ```
 
-    effectful step:
+  effectful step:
 
-    ```text
-    bind(Req r k1, f) = Req r (\x -> bind (k1 x) f)
-    ```
+  ```text
+  bind(Req r k1, f) = Req r (\x -> bind (k1 x) f)
+  ```
 
-    This is just pattern matching on the *first* step of the computation:
+  This is just pattern matching on the _first_ step of the computation:
 
-    - if it is already finished (`Done x`), call `f` on the result;
-    - if it is a request (`Req r k1`), re-emit the same request and say:
-      “once you get a reply `x`, resume with `k1 x`, and then keep binding with `f`”.
+  - if it is already finished (`Done x`), call `f` on the result;
+  - if it is a request (`Req r k1`), re-emit the same request and say:
+    “once you get a reply `x`, resume with `k1 x`, and then keep binding with `f`”.
 
-    We now check associativity **by cases on `m`**, not by a full structural induction over all possible computations:
+  We now check associativity **by cases on `m`**, not by a full structural induction over all possible computations:
 
-    - the `Done` case was handled above;
-    - here we handle the single-step `Req` case, and we do not recurse over longer traces explicitly.
+  - the `Done` case was handled above;
+  - here we handle the single-step `Req` case, and we do not recurse over longer traces explicitly.
 
-    **Left-hand side**
+  **Left-hand side**
 
-    ```text
-    bind (bind m f) g
-    = bind (bind (Req r k1) f) g
-    = bind (Req r (\x -> bind (k1 x) f)) g
-    = Req r (\y -> bind ((\x -> bind (k1 x) f) y) g)
-    = Req r (\y -> bind (bind (k1 y) f) g)
-    ```
+  ```text
+  bind (bind m f) g
+  = bind (bind (Req r k1) f) g
+  = bind (Req r (\x -> bind (k1 x) f)) g
+  = Req r (\y -> bind ((\x -> bind (k1 x) f) y) g)
+  = Req r (\y -> bind (bind (k1 y) f) g)
+  ```
 
-    **Right-hand side**
+  **Right-hand side**
 
-    ```text
-    bind m (\x -> bind (f x) g)
-    = bind (Req r k1) (\x -> bind (f x) g)
-    = Req r (\y -> bind (k1 y) (\x -> bind (f x) g))
-    ```
+  ```text
+  bind m (\x -> bind (f x) g)
+  = bind (Req r k1) (\x -> bind (f x) g)
+  = Req r (\y -> bind (k1 y) (\x -> bind (f x) g))
+  ```
 
-    On both sides, the *outer shape* is the same: `Req r (...)`.  
-    The only difference lies in the transformed continuation:
+  On both sides, the _outer shape_ is the same: `Req r (...)`.  
+   The only difference lies in the transformed continuation:
 
-    ```text
-    k_L(y) = bind (bind (k1 y) f) g
-    k_R(y) = bind (k1 y) (\x -> bind (f x) g)
-    ```
+  ```text
+  k_L(y) = bind (bind (k1 y) f) g
+  k_R(y) = bind (k1 y) (\x -> bind (f x) g)
+  ```
 
-    These are precisely the left and right sides of the **same associativity law**, but now applied to the *shorter* computation `k1 y`:
+  These are precisely the left and right sides of the **same associativity law**, but now applied to the _shorter_ computation `k1 y`:
 
-    ```text
-    bind (bind n f) g    =    bind n (\x -> bind (f x) g)
-                 ^                    ^
-                 n = k1 y             n = k1 y
-    ```
+  ```text
+  bind (bind n f) g    =    bind n (\x -> bind (f x) g)
+               ^                    ^
+               n = k1 y             n = k1 y
+  ```
 
-    In other words, for a `Req` step our `bind` does nothing but:
+  In other words, for a `Req` step our `bind` does nothing but:
 
-    - keep the request `r` unchanged;
-    - replace the continuation `k1` with a new continuation that keeps composing with `f` and `g` in the same order.
+  - keep the request `r` unchanged;
+  - replace the continuation `k1` with a new continuation that keeps composing with `f` and `g` in the same order.
 
-    The “work” of associativity is thus pushed inside the continuation, without introducing any reordering of effects.
+  The “work” of associativity is thus pushed inside the continuation, without introducing any reordering of effects.
 
-Because the implementation of `bind` for the `Req` case *only* rewraps the continuation with another call to `bind`, without changing the order, both sides describe the same staged interaction:
+Because the implementation of `bind` for the `Req` case _only_ rewraps the continuation with another call to `bind`, without changing the order, both sides describe the same staged interaction:
 
 1. Emit exactly the same requests in the same order.
 2. For each response, resume with `k1`, then `f`, then `g` in the same nesting.
@@ -1575,7 +1558,7 @@ In summary, `Comp<ReqT>` with:
 forms a monad. This monadic structure is what lets us:
 
 - write pure-looking code (`int`, `inc`, `app`, `if_`),
-- layer in effects (`get`, `put`) as *requests*,
+- layer in effects (`get`, `put`) as _requests_,
 - and keep handlers (`handle_state`) separate, all while preserving the monad laws that guarantee predictable sequencing of effects.
 
 A practical introduction to how monads can be used is found [here](https://cs3110.github.io/textbook/chapters/ds/monads.html).
