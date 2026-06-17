@@ -27,7 +27,7 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I am a PhD student at the University of Waterloo, where I work on automated reasoning for program verification and compiler optimizations, under the supervision of <a href="https://uwaterloo.ca/electrical-computer-engineering/profile/agurfink">Prof. Arie Gurfinkel</a>.
+I recently defended my PhD successfully at the University of Waterloo, where I worked on automated reasoning for program verification and compiler optimizations under  <a href="https://uwaterloo.ca/electrical-computer-engineering/profile/agurfink">Prof. Arie Gurfinkel’s</a> supervision. I am now exploring remote-first opportunities where I can contribute to formal methods, verification tooling, or AI-safety-adjacent systems research.
 
 Prior to graduate school, I was a software engineer at Google, where I contributed to firmware, build systems, web applications, and testing tools.
 
